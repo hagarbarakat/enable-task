@@ -4,7 +4,10 @@ import * as mongoose from 'mongoose';
 import { Role } from 'src/auth/enums/role.enum';
 import { Task } from 'src/task/schemas/task.schema';
 import { ObjectId } from 'mongoose';
-import { Department } from 'src/department/schemas/department.schema';
+import {
+  Department,
+  DepartmentSchema,
+} from 'src/department/schemas/department.schema';
 
 export type UserDocument = User & Document;
 
@@ -33,8 +36,8 @@ export class User {
   tasks: Task[];
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Department',
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: Department.name,
   })
   department: Department;
 

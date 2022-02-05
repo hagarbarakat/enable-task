@@ -5,6 +5,8 @@ import {
   Injectable,
   HttpStatus,
   HttpException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schemas/user.schema';
@@ -14,21 +16,24 @@ import { Schema as MongooseSchema } from 'mongoose';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from 'src/auth/enums/role.enum';
 import { Department } from 'src/department/schemas/department.schema';
+import { DepartmentService } from 'src/department/department.service';
 
 const saltRounds = 10;
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
+  constructor(
+    @InjectModel('User') private readonly userModel: Model<User>,
+    @Inject(forwardRef(() => DepartmentService))
+    private departmentService: DepartmentService,
+  ) {}
 
   async findAll(user): Promise<User[]> {
     if (user.role === Role.SUPERADMIN)
       return await this.userModel.find().exec();
     else {
-      return await this.userModel
-        .find({ _id: user.userID })
-        .populate('department', null, Department.name)
-        .exec();
+      const dep = await this.getUserDetails(user.userId);
+      return await this.departmentService.getUsersDep(dep.department[0]._id);
     }
   }
 
@@ -87,10 +92,20 @@ export class UserService {
     }
   }
 
-  async getUserDetails(id) {
-    await this.userModel
-      .findById(id)
-      .populate('department', null, Department.name)
-      .exec();
+  async getUserDetails(id): Promise<User> {
+    return await this.userModel.findById(id).populate('department').exec();
+  }
+
+  async filterUsers(query: Record<string, any>, user): Promise<User[]> {
+    if (user.role === Role.DEPARTMENTMANAGER) {
+      const dep = await this.getUserDetails(user.userId);
+      return await this.userModel
+        .find(query)
+        .where('department')
+        .equals(dep.department[0]._id)
+        .exec();
+    } else {
+      return await this.userModel.find(query).exec();
+    }
   }
 }

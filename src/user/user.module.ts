@@ -9,6 +9,7 @@ import { DepartmentModule } from 'src/department/department.module';
 
 @Module({
   imports: [
+    forwardRef(() => DepartmentModule),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [UserController],

@@ -6,7 +6,8 @@ import {
   Param,
   Body,
   UseGuards,
-  Request
+  Request,
+  Query,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
@@ -34,11 +35,19 @@ export class UserController {
     return this.usersService.findAll(req.user);
   }
 
+  @Get('/filter')
+  @Get()
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPERADMIN, Role.DEPARTMENTMANAGER)
+  filterUsers(@Query() query: Record<string, any>, @Request() req) {
+    return this.usersService.filterUsers(query, req.user);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: MongooseSchema.Types.ObjectId): Promise<User> {
-    console.log(id);
     return this.usersService.findById(id);
   }
+
   @Get(':email')
   findOnebyEmail(@Param('email') email: string): Promise<User> {
     return this.usersService.findByEmail(email);

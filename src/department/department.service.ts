@@ -73,9 +73,14 @@ export class DepartmentService {
     id: MongooseSchema.Types.ObjectId,
     updateDepartmentDto: UpdateDepartmentDto,
   ): Promise<Department> {
-    console.log(user);
     if (user.role === Role.DEPARTMENTMANAGER) {
-      const userDetails = await this.userService.getUserDetails(user.userId);
+      const userDetails = await this.userService.getUserDetails(user.userId);      
+      if (user.userId != userDetails._id) {
+        throw new HttpException(
+          "CAN'T_UPDADE_THIS_DEPARTMENT",
+          HttpStatus.FORBIDDEN,
+        );
+      }
       console.log(userDetails);
     }
     const department = await this.departmentModel.findOne({ _id: id }).exec();
@@ -87,5 +92,8 @@ export class DepartmentService {
     } else {
       throw new HttpException('DEPARTMENT_NOT_FOUND', HttpStatus.NOT_FOUND);
     }
+  }
+  async getUsersDep(id): Promise<any> {
+    return await this.departmentModel.findById(id).populate('users').exec();
   }
 }
