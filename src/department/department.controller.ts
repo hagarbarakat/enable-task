@@ -17,6 +17,9 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
 import { Schema as MongooseSchema } from 'mongoose';
 import { UpdateDepartmentDto } from './dto/updatedepartment.dto';
+import { ApiBody, ApiParam } from '@nestjs/swagger';
+import { UpdateUserDto } from 'src/user/dto/update-user.dto';
+
 
 @Controller('department')
 @UseGuards(RolesGuard)
@@ -25,6 +28,7 @@ export class DepartmentController {
 
   @Post()
   @Roles(Role.SUPERADMIN)
+  @ApiBody({ type: [DepartmentDto] })
   create(@Body() departmentDto: DepartmentDto): Promise<Department> {
     return this.departmentService.createNewDepartment(departmentDto);
   }
@@ -38,7 +42,6 @@ export class DepartmentController {
   @Get(':id')
   @Roles(Role.SUPERADMIN)
   findOne(@Param('id') id: MongooseSchema.Types.ObjectId): Promise<Department> {
-    console.log(this.departmentService.findById(id));
     return this.departmentService.findById(id);
   }
 
@@ -50,15 +53,17 @@ export class DepartmentController {
 
   @Put('assign-user/:id')
   @Roles(Role.SUPERADMIN)
+  @ApiBody({ type: [UpdateUserDto] })
   assignUser(
     @Param('id') id: MongooseSchema.Types.ObjectId,
-    @Body() updateDepartmentDto: UpdateDepartmentDto,
+    @Body() updateUserDto: UpdateUserDto,
   ): Promise<Department> {
-    return this.departmentService.addUserToDepartment(id, updateDepartmentDto);
+    return this.departmentService.addUserToDepartment(id, updateUserDto);
   }
 
   @Put(':id')
   @Roles(Role.SUPERADMIN, Role.DEPARTMENTMANAGER)
+  @ApiBody({ type: [UpdateDepartmentDto] })
   updateDepartment(
     @Param('id') id: MongooseSchema.Types.ObjectId,
     @Body() updateDepartmentDto: UpdateDepartmentDto,

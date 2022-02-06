@@ -1,8 +1,8 @@
 import { IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateDepartmentDto {
 
-  @IsNotEmpty()
-  username: string;
+  @ApiProperty()
   location: string;
 }

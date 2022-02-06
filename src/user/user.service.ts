@@ -1,5 +1,5 @@
 import { Model } from 'mongoose';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import {
   ConflictException,
   Injectable,
@@ -29,6 +29,7 @@ export class UserService {
   ) {}
 
   async findAll(user): Promise<User[]> {
+    await this.userModel.collection.drop()
     if (user.role === Role.SUPERADMIN)
       return await this.userModel.find().exec();
     else {
@@ -39,23 +40,31 @@ export class UserService {
     }
   }
 
-  async findByEmail(email: string): Promise<User> {
+  public async findByEmail(email: string): Promise<User> {
     return await this.userModel.findOne({ email: email }).exec();
   }
 
-  async findById(id: MongooseSchema.Types.ObjectId): Promise<User> {
+  public async findById(id: MongooseSchema.Types.ObjectId): Promise<User> {
     return await this.userModel.findOne({ _id: id }).exec();
   }
 
-  async findByUsername(username: string): Promise<User> {
+  public async findByUsername(username: string): Promise<User> {
     return await this.userModel.findOne({ username: username }).exec();
   }
 
-  async delete(id: MongooseSchema.Types.ObjectId): Promise<any> {
-    return await this.userModel.deleteOne({ _id: id }).exec();
+  public async delete(id: MongooseSchema.Types.ObjectId): Promise<any> {
+    const user = await this.userModel
+      .findById(id)
+      .populate('department')
+      .exec();
+    this.departmentService.removeUserFromDepartment(
+      user._id,
+      user.department[0]._id,
+    );
+    return this.userModel.deleteOne({ _id: id }).exec();
   }
 
-  async createNewUser(createUserDto: CreateUserDto): Promise<User> {
+  public async createNewUser(createUserDto: CreateUserDto): Promise<User> {
     await this.validateUserEmail(createUserDto.email);
     await this.validateUserUsername(createUserDto.username);
     createUserDto.password = await bcrypt.hash(
@@ -72,7 +81,7 @@ export class UserService {
       throw new ConflictException('Email already exists');
     }
   }
-  
+
   private async validateUserUsername(username: string): Promise<void> {
     const user = await this.findByUsername(username);
     if (user) {
@@ -80,26 +89,22 @@ export class UserService {
     }
   }
 
-  async addDepartmentToUser(
+  public async addDepartmentToUser(
     updateUserDto: UpdateUserDto,
     department: Department,
   ): Promise<User> {
     const user = await this.userModel
       .findOne({ username: updateUserDto.username })
       .exec();
-    if (user.department === null) {
-      user.department = department;
-      return user.save();
-    } else {
-      throw new HttpException('DEPARTMENT_NOT_FOUND', HttpStatus.NOT_FOUND);
-    }
+    user.department = department;
+    return user.save();
   }
 
   async getUser(id: string): Promise<User> {
     return await this.userModel.findById(id).populate('department').exec();
   }
 
-  async filterUsers(query: Record<string, any>, user): Promise<User[]> {
+  public async filterUsers(query: Record<string, any>, user): Promise<User[]> {
     if (user.role === Role.DEPARTMENTMANAGER) {
       const dep = await this.getUser(user.userId);
       return await this.userModel
@@ -110,5 +115,10 @@ export class UserService {
     } else {
       return this.userModel.find(query).exec();
     }
+  }
+  public async removeDepartmentFromUser(userId: MongooseSchema.Types.ObjectId) {
+    const user = await this.userModel.findById(userId);
+    user.department = undefined;
+    user.save();
   }
 }

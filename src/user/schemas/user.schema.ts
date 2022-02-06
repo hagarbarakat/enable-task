@@ -8,6 +8,7 @@ import {
   Department,
   DepartmentSchema,
 } from 'src/department/schemas/department.schema';
+import { Factory } from 'nestjs-seeder';
 
 export type UserDocument = User & Document;
 
@@ -16,22 +17,27 @@ export class User {
   _id: ObjectId;
 
   @Prop({ required: true })
+  @Factory((faker) => faker.name.findName())
   firstName: string;
 
   @Prop()
   lastName: string;
 
   @Prop({ required: true, unique: true })
+  @Factory((faker) => faker.name.findName())
   username: string;
 
   @Prop({ required: true })
+  @Factory('$2b$10$iSNZZtijowrzPHMwvWrPE.CywY.Fu4X39ktfZ7EBfRa0LoKjRF.fu') //1234567
   password: string;
 
   @Prop({ required: true, unique: true })
+  @Factory((faker) => faker.internet.email())
   email: string;
 
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task', unique: true }],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task', sparse: true }],
+    sparse: true
   })
   tasks: Task[];
 
@@ -41,7 +47,8 @@ export class User {
   })
   department: Department;
 
-  @Prop({ type: String, enum: Role, default: Role.EMPLOYEE })
+  @Prop({ type: String, enum: Role })
+  @Factory('superadmin')
   role: Role[];
 }
 

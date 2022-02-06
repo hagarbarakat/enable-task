@@ -26,7 +26,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   handleRequest(err, user, info) {
     // You can throw an exception based on either "info" or "err" arguments
     //doesn't check user as there is optional login requirement -> guests can login 
-    //console.log(user);
     if (err) {
       throw err || new UnauthorizedException();
     }

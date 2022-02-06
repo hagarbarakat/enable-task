@@ -13,6 +13,8 @@
         "start:dev": "nest start --watch",
         "start:debug": "nest start --debug --watch",
         "start:prod": "node dist/main",
+        "seed": "node dist/seeder",
+        "seed:refresh": "node dist/seeder --refresh",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
         "test": "jest",
         "test:watch": "jest --watch",
@@ -28,7 +30,9 @@
         "@nestjs/mongoose": "^9.0.2",
         "@nestjs/passport": "^8.1.0",
         "@nestjs/platform-express": "^8.0.0",
+        "@nestjs/swagger": "^5.2.0",
         "bcrypt": "^5.0.1",
+        "bcryptjs": "^2.4.3",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.13.2",
         "mongoose": "^6.1.9",
@@ -39,7 +43,8 @@
         "passport-local": "^1.0.0",
         "reflect-metadata": "^0.1.13",
         "rimraf": "^3.0.2",
-        "rxjs": "^7.2.0"
+        "rxjs": "^7.2.0",
+        "swagger-ui-express": "^4.3.0"
     },
     "devDependencies": {
         "@nestjs/cli": "^8.0.0",
@@ -58,6 +63,7 @@
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-prettier": "^4.0.0",
         "jest": "^27.2.5",
+        "nestjs-seeder": "^0.2.0",
         "prettier": "^2.3.2",
         "source-map-support": "^0.5.20",
         "supertest": "^6.1.3",
