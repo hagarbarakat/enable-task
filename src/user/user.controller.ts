@@ -16,6 +16,7 @@ import { RolesGuard } from '../auth/guards/roles.guards';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
 import { Schema as MongooseSchema } from 'mongoose';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -43,14 +44,24 @@ export class UserController {
     return this.usersService.filterUsers(query, req.user);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: MongooseSchema.Types.ObjectId): Promise<User> {
-    return this.usersService.findById(id);
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
 
-  @Get(':email')
+  @Get('user/:email')
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPERADMIN)
   findOnebyEmail(@Param('email') email: string): Promise<User> {
     return this.usersService.findByEmail(email);
+  }
+
+  @Get(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.SUPERADMIN)
+  findOne(@Param('id') id: MongooseSchema.Types.ObjectId): Promise<User> {
+    return this.usersService.findById(id);
   }
 
   @Delete(':id')
@@ -59,4 +70,6 @@ export class UserController {
   remove(@Param('id') id: MongooseSchema.Types.ObjectId): Promise<any> {
     return this.usersService.delete(id);
   }
+
+
 }

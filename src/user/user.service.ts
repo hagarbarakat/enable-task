@@ -32,8 +32,10 @@ export class UserService {
     if (user.role === Role.SUPERADMIN)
       return await this.userModel.find().exec();
     else {
-      const dep = await this.getUserDetails(user.userId);
-      return await this.departmentService.getUsersDep(dep.department[0]._id);
+      const dep = await this.getUser(user.userId);
+      return await this.departmentService.getUsersByDepartmentId(
+        dep.department[0]._id,
+      );
     }
   }
 
@@ -45,7 +47,7 @@ export class UserService {
     return await this.userModel.findOne({ _id: id }).exec();
   }
 
-  async findOne(username: string): Promise<User> {
+  async findByUsername(username: string): Promise<User> {
     return await this.userModel.findOne({ username: username }).exec();
   }
 
@@ -70,21 +72,22 @@ export class UserService {
       throw new ConflictException('Email already exists');
     }
   }
+  
   private async validateUserUsername(username: string): Promise<void> {
-    const user = await this.findOne(username);
+    const user = await this.findByUsername(username);
     if (user) {
       throw new ConflictException('Username already exists');
     }
   }
 
-  async getAssigned(
+  async addDepartmentToUser(
     updateUserDto: UpdateUserDto,
     department: Department,
   ): Promise<User> {
     const user = await this.userModel
       .findOne({ username: updateUserDto.username })
       .exec();
-    if (user) {
+    if (user.department === null) {
       user.department = department;
       return user.save();
     } else {
@@ -92,20 +95,20 @@ export class UserService {
     }
   }
 
-  async getUserDetails(id): Promise<User> {
+  async getUser(id: string): Promise<User> {
     return await this.userModel.findById(id).populate('department').exec();
   }
 
   async filterUsers(query: Record<string, any>, user): Promise<User[]> {
     if (user.role === Role.DEPARTMENTMANAGER) {
-      const dep = await this.getUserDetails(user.userId);
+      const dep = await this.getUser(user.userId);
       return await this.userModel
         .find(query)
         .where('department')
         .equals(dep.department[0]._id)
         .exec();
     } else {
-      return await this.userModel.find(query).exec();
+      return this.userModel.find(query).exec();
     }
   }
 }

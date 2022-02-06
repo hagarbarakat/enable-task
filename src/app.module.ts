@@ -9,7 +9,6 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guards';
-import { CaslModule } from './casl/casl.module';
 
 @Module({
   imports: [
@@ -19,7 +18,6 @@ import { CaslModule } from './casl/casl.module';
       'mongodb+srv://hagar:kWoMQ5bSaAexPrCR@cluster0.pwqk8.mongodb.net/enableDB?retryWrites=true&w=majority',
     ),
     AuthModule,
-    CaslModule,
   ],
   controllers: [AppController],
   providers: [

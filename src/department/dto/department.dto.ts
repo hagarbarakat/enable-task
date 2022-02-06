@@ -4,7 +4,6 @@ import * as mongoose from 'mongoose';
 
 export class DepartmentDto {
 
-  _id: mongoose.Schema.Types.ObjectId;
   @IsNotEmpty()
   name: string;
   users: User[];

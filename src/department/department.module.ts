@@ -15,7 +15,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
         name: Department.name,
         useFactory: () => {
           const schema = DepartmentSchema;
-          schema.plugin(require('mongoose-unique-array'));
           schema.plugin(require('mongoose-autopopulate'));
           return schema;
         },

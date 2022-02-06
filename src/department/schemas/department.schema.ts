@@ -11,11 +11,13 @@ export class Department {
 
   @Prop({ required: true, unique: true })
   name: string;
+  
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
-    unique: true
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    sparse: true,
   })
   users: User[];
+
   @Prop()
   location: string;
 }
