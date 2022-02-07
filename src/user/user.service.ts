@@ -29,7 +29,6 @@ export class UserService {
   ) {}
 
   async findAll(user): Promise<User[]> {
-    await this.userModel.collection.drop()
     if (user.role === Role.SUPERADMIN)
       return await this.userModel.find().exec();
     else {

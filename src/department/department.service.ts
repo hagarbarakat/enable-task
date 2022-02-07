@@ -35,8 +35,6 @@ export class DepartmentService {
   }
 
   public async findAll(): Promise<Department[]> {
-    await this.departmentModel.collection.drop()
-
     return await this.departmentModel.find().populate('users').exec();
   }
 
